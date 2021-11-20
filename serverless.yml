@@ -1,0 +1,139 @@
+service: presignedurl
+
+variablesResolutionMode: 20210326
+
+plugins:
+  - serverless-esbuild
+  - serverless-s3-sync
+  - serverless-s3-cleaner
+  - serverless-iam-roles-per-function
+
+package:
+  individually: true
+  patterns:
+    - '!node_modules/**'
+    - '!.serverless/**'
+
+custom:
+  project: template
+  baseName: ${self:custom.project}-${self:service}-${self:provider.stage}
+
+  bucketName: ${self:custom.baseName}-bucket
+
+  esbuild:
+    target: node14
+    packager: yarn
+    minify: true
+    sourcemap: true
+  
+  s3Sync:
+    - bucketName: ${self:custom.bucketName}
+      localDir: files/bucket
+  
+  serverless-s3-cleaner:
+    buckets:
+      - ${self:custom.bucketName}
+      - ${cf:${self:custom.baseName}.ServerlessDeploymentBucketName, ''}
+
+  serverless-iam-roles-per-function:
+    defaultInherit: true
+  
+
+provider:
+  name: aws
+  region: ${opt:region, 'eu-west-1'}
+  stage: ${opt:stage, 'dev'}
+  stackName: ${self:custom.baseName}
+  deploymentBucket:
+    blockPublicAccess: true
+  runtime: nodejs14.x
+  memorySize: 128
+  timeout: 25
+  versionFunctions: false
+  logRetentionInDays: 7
+  logs:
+    httpApi: true
+  environment:
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+    NODE_OPTIONS: "--enable-source-maps"
+    REGION: ${self:provider.region}
+    BUCKET_NAME: ${self:custom.bucketName}
+  httpApi:
+    cors:
+      allowedOrigins: 
+        - '*'
+      allowedMethods:
+        - GET
+      allowedHeaders:
+        - Content-Type
+  iam:
+    role:
+      name: ${self:custom.baseName}
+      statements:
+        - Effect: Allow
+          Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+          Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/*:log-stream:*
+        - Effect: Allow
+          Action: 
+            - s3:GetObject
+            - s3:PutObject
+          Resource: 
+            - !Sub arn:aws:s3:::${AssetsBucket}/* 
+
+functions:
+  GetObject:
+    name: ${self:custom.baseName}-getobject
+    handler: src/getObject/index.handler
+    events:
+      - httpApi:
+          path: /getobject
+          method: GET
+  PutObject:
+    name: ${self:custom.baseName}-putobject
+    handler: src/putObject/index.handler
+    events:
+      - httpApi:
+          path: /putobject
+          method: GET
+
+
+resources:
+  Resources:
+
+    # S3
+
+    AssetsBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.bucketName}
+        AccessControl: Private
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: true
+          BlockPublicPolicy: true
+          IgnorePublicAcls: true
+          RestrictPublicBuckets: true
+    
+    AssetsBucketAccessPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket: ${self:custom.bucketName}
+        PolicyDocument:
+          Statement:
+            - Effect: Allow
+              Action: s3:GetObject
+              Principal:
+                AWS: !Sub ${AWS::AccountId}
+              Resource: 
+                - !Sub arn:aws:s3:::${AssetsBucket}/* 
+
+    # SSM
+
+    EndpointDomainParam:
+      Type: AWS::SSM::Parameter
+      Properties:
+        Name: /${self:provider.stage}/${self:service}/endpointUrl
+        Value: !Sub https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com
+        Type: String
