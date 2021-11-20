@@ -1,8 +1,15 @@
 # S3 Bucket Presigned Urls
 
+## Architecture
+
+<p align="center">
+  <img src="/architecture-diagram.drawio.svg" />
+</p>
+
+
 ## Info 
 
-This handles deployment for a http api, four integrated lambdas, and s3 bucket.
+This handles deployment for a http api, integrated lambdas, and s3 bucket.
 
 All objects by default are private. Only the object owner has permission to access specific objects or upload specific objects. However, the object owner can optionally share objects with others by creating a presigned URL, using their own security credentials, to grant time-limited permission to download the objects. Presigned URLs are also useful if you want your user/customer to be able to upload a specific object to your bucket, but you don't require them to have AWS security credentials or permissions.
 
@@ -26,12 +33,6 @@ For more information...
 - [AWS Documentation: Sharing an object with a presigned URL](https://docs.aws.amazon.com/AmazonS3/latest/userguide/ShareObjectPreSignedURL.html)
 - [AWS Documentation: Uploading objects using presigned URLs](https://docs.aws.amazon.com/AmazonS3/latest/userguide/PresignedUrlUploadObject.html)
 
-
-## Architecture
-
-<p align="center">
-  <img src="/architecture-diagram.drawio.svg" />
-</p>
 
 ## Usage 
 
