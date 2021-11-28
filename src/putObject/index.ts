@@ -2,7 +2,6 @@ import {Context} from 'aws-lambda/handler';
 import {APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2} from 'aws-lambda/trigger/api-gateway-proxy';
 import {S3Client, PutObjectCommandInput, PutObjectCommand} from '@aws-sdk/client-s3';
 import {getSignedUrl} from '@aws-sdk/s3-request-presigner';
-import {v4 as uuid} from 'uuid';
 
 const bucketName: string = process.env.BUCKET_NAME || '';
 const bucketKey: string = 'aws-logo2.png';
