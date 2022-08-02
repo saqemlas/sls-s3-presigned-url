@@ -1,12 +1,5 @@
 # S3 Bucket Presigned Urls
 
-## Architecture
-
-<p align="center">
-  <img src="/architecture-diagram.drawio.svg" />
-</p>
-
-
 ## Info 
 
 This handles deployment for a http api, integrated lambdas, and s3 bucket.
@@ -33,6 +26,12 @@ For more information...
 - [AWS Documentation: Sharing an object with a presigned URL](https://docs.aws.amazon.com/AmazonS3/latest/userguide/ShareObjectPreSignedURL.html)
 - [AWS Documentation: Uploading objects using presigned URLs](https://docs.aws.amazon.com/AmazonS3/latest/userguide/PresignedUrlUploadObject.html)
 
+
+## Architecture
+
+<p align="center">
+  <img src="/architecture-diagram.drawio.svg" />
+</p>
 
 ## Usage 
 

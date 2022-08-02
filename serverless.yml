@@ -1,7 +1,5 @@
 service: presignedurl
 
-variablesResolutionMode: 20210326
-
 plugins:
   - serverless-esbuild
   - serverless-s3-sync
@@ -86,14 +84,14 @@ provider:
 functions:
   GetObject:
     name: ${self:custom.baseName}-getobject
-    handler: src/getObject/index.handler
+    handler: functions/getObject/index.handler
     events:
       - httpApi:
           path: /getobject
           method: GET
   PutObject:
     name: ${self:custom.baseName}-putobject
-    handler: src/putObject/index.handler
+    handler: functions/putObject/index.handler
     events:
       - httpApi:
           path: /putobject
